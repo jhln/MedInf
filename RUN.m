@@ -65,9 +65,19 @@ hauptVect = eigenVects(:,1);
 
 [eigenVects, eigenVals] = ourPca(activeData);
 hauptVect = eigenVects(:,1);
-projectedData = projectOnHauptVect(activeData, hauptVect);
-%plot2DPCA(transpose(activeData),mean(activeData,2),transpose(projectedData),eigenVects,diag(eigenVals),1,1);
-%title('Aufgabe3.1')
+helperProjection = projectOnHauptVect(activeData, hauptVect);
+
+%andere art zu projezieren siehe Task 4, auch hier scheinen die daten
+%um die x-achse gespiegelt, vielleicht wegen dem transpose?
+projectedData = transpose(activeData) * eigenVects;
+projectedData(:,2) = zeros(1,length(projectedData(:,2)));
+reconstructedData = (hauptVect) * transpose(projectedData(:,1)) + mean(activeData,2);
+%additionally ploting the correct helperProjection (o) and the
+%reconstruction (+)
+plot2DPCA(transpose(activeData),mean(activeData,2),(projectedData),eigenVects,diag(eigenVals),1,1);
+plot(helperProjection(1,:),helperProjection(2,:),'o')
+plot(reconstructedData(1,:),reconstructedData(2,:),'+')
+title('Aufgabe3.1')
 
 nebenVect = eigenVects(:,2);
 projectedData2 = projectOnHauptVect(activeData, nebenVect);

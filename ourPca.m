@@ -2,7 +2,7 @@
 %computes pca
 function [geordneteEigenVects, geordneteEigenVals] = ourPca(data)
     
-    data = data - mean(data,2);
+    %data = data - mean(data,2);
 
     [geordneteEigenVals,i] = sort(eig(ourCov(data)),'descend');
 
