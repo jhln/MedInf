@@ -1,6 +1,6 @@
 
 % self-programmed covarianceMatrix with variable dimensions
-function covMatrix = ourCov2(dataMatrix)
+function covMatrix = ourCov(dataMatrix)
 
     [r,c] = size(dataMatrix);
     

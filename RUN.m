@@ -6,14 +6,100 @@ data2D = load('daten.mat');
 data3D = load('daten3d.mat');
 dataS = load('shapes.mat');
 
+%data to use for the run
+activeData = data2D.data3;
 
 
-%x = data2D.data1(1,:);
-%y = data2D.data1(2,:);
+%
+%   Aufgabe 1
+%
 
-%plot(x,y,'*');
-%plot(data2D.data1(1,:), data2D.data1(2,:))
+covarianzMatrix = ourCov(activeData);
+
+%iterate over all data matrices in e.g. data2D
+%{
+fn = fieldnames(data2D);
+c = numel(fn);
+
+tiledlayout(c,1)
+for i = 1:c
+    d = data2D.(fn{i});
+    d = d - mean(d,2);
+    
+    subtract the mean of the data 
+    d = activeData - mean(activeData,2);
+
+    nexttile
+    plot(d(1,:), d(2,:),'x')
+    axis equal
+
+    title('data')
+    cov(d(1,:),d(2,:))
+    ourCov(d)
+end
+%}
+
+activeData = activeData - mean(activeData,2);
+
+%plot(activeData(1,:), activeData(2,:),'x')
 %axis equal
+%title('Aufgabe1')
+ 
+
+
+%
+%   Aufgabe 2
+%
+
+[eigenVects, eigenVals] = ourPca(activeData);
+hauptVect = eigenVects(:,1);
+%plot2DPCA(transpose(activeData),mean(activeData,2),0,eigenVects,diag(eigenVals),1,0)
+%title('Aufgabe2')
+
+
+
+%
+%   Aufgabe 3
+%
+%shift data around mean done in task1. 
+
+[eigenVects, eigenVals] = ourPca(activeData);
+hauptVect = eigenVects(:,1);
+projectedData = projectOnHauptVect(activeData, hauptVect);
+%plot2DPCA(transpose(activeData),mean(activeData,2),transpose(projectedData),eigenVects,diag(eigenVals),1,1);
+%title('Aufgabe3.1')
+
+nebenVect = eigenVects(:,2);
+projectedData2 = projectOnHauptVect(activeData, nebenVect);
+%plot2DPCA(transpose(activeData),mean(activeData,2),transpose(projectedData2),eigenVects,diag(eigenVals),1,1)
+%title('Aufgabe3.2')
+
+
+
+%
+%   Aufgabe 4
+%
+
+activeData = data3D.data;
+activeData = activeData - mean(activeData,2);
+[eigenVects3D,eigenVals3D]= ourPca(activeData);
+
+plot3DPCA(transpose(activeData), transpose(mean(activeData,2)), eigenVects3D, diag(eigenVals3D), 1, 1)
+% error elipsoid fehlt noch
+
+%projectedData3D = projectOnHauptVect3D(activeData, eigenVects3D(:,1), eigenVects3D(:,2));
+
+%andere art zu projezieren, nicht ganz sicher obs stimmt, z-komponente sollte
+%vernachlässigbar sein, daten wirken aber um x gespiegelt, aber die rekonstruktion scheint richtig.
+projectedData3D = transpose(activeData) * eigenVects3D;
+projectedData3D(:,3) = zeros(1,length(projectedData3D(:,1)));
+plot3(projectedData3D(:,1),projectedData3D(:,2),projectedData3D(:,3),'o');
+
+reconstructedData3D = (eigenVects3D(:,1:2)) * transpose(projectedData3D(:,1:2)) + mean(activeData,2);
+plot3(reconstructedData3D(1,:),reconstructedData3D(2,:),reconstructedData3D(3,:),'+');
+title('Aufgabe 4')
+
+return
 
 
 %
@@ -22,7 +108,7 @@ dataS = load('shapes.mat');
 
 dataShapes = dataS.aligned;
 meanShape = mean(dataShapes,3);
-[sortedEigVecS, sortedEigValS] = pca(dataShapes);
+[sortedEigVecS, sortedEigValS] = ourPca(dataShapes);
 %sortedEigVecS(:,2)
 chosenEigenV = [sortedEigVecS(:,1), sortedEigVecS(:,2),sortedEigVecS(:,3) ];
 dummyReconstructionS = generateShapes([1,1,1], chosenEigenV )
@@ -34,73 +120,8 @@ dummyReconstructionS = generateShapes([1,1,1], chosenEigenV )
 
 
 %
-%   Aufgabe 4
+%   Util
 %
-
-data3 = data3D.data;
-mean(data3,2);
-%dataMean3 = data3 - mean(data3,2);
-[sortedEigVec3,sortedEigVal3]= pca(data3); % meint ihr das ist realistisch?
-%mean(data3,2)
-%diag(sortedEigVal3)
-%%%%plot3DPCA(transpose(data3), transpose(mean(data3,2)), sortedEigVec3, diag(sortedEigVal3), 1, 1)
-
-% error elipsoid fehlt noch
-
-%und und ob das jetzt stimmt ... bin mir nicht sicher, wie man auf eine
-%fläche projeziert, also mit 2 Hauptvectoren - ein offener versuch unter projectOn2HauptVect
-%Cloud3D*[sortedEigVec3(:,1),sortedEigVec3(:,2)]
-projected3 = projectOn2HauptVect(data3, sortedEigVec3(:,1), sortedEigVec3(:,2));
-%%%%plot3DPCA(transpose(projected3), transpose(mean(projected3,2)), sortedEigVec3, diag(sortedEigVal3), 1, 1)
-
-
-
-%
-%   Aufgabe 3
-%
-
-data2 = data2D.data2;
-dataMean2 = data2 - mean(data2,2);
-
-[sortedEigVec2, sortedEigVal2] = pca(data2);
-hauptVect2 = sortedEigVec2(:,1);
-%plot(d2(1,:),d2(2,:))
-dummyReconstruction2 = projectOnHauptVect(data2, hauptVect2);
-
-% nicht sicher wegen den parametern - die daten müssten meiner meinung nach
-% transponiert wernden, but not sure
-%%%%plot2DPCA(transpose(data2),mean(d2,2),transpose(projectedData2),eigenVects2,diag(eigenVals2),1,1)
-%bin mir auch nicht sicher, was der richtige mean wert ist
-%%%%plot2DPCA(transpose(data2),dataMean2,transpose(dummyReconstruction2),sortedEigVec2,diag(sortedEigVal2),1,1)
-%%%%plot2DPCA(data2, dataMean2, dummyReconstruction2, sortedEigVec2, sortedEigVal2, 1, 1)
-
-%nochmal für den 1. Nebenvektor - wobei es ja eigentlich nur 2 überhaupt
-%gibt !?
-nebenVect2 = sortedEigVec2(:,2);
-%plot(d2(1,:),d2(2,:))
-projectedData2 = projectOnHauptVect(data2, nebenVect2);
-
-%%%%plot2DPCA(transpose(d2),mean(d2,2),transpose(projectedData2),eigenVects2,diag(eigenVals2),1,1)
-
-
-%
-%   Aufgabe 2
-%
-
-d1 = data2D.data1;
-
-[eigenVects1, eigenVals1] = pca(d1);
-hauptVect1 = eigenVects1(:,1);
-%plot(d2(1,:),d2(2,:))
-
-% nicht sicher wegen den parametern - weil hier keine reconstruction
-% stattfindet
-%%%%plot2DPCA(transpose(d1),mean(d1,2),transpose(d1),eigenVects1,diag(eigenVals1),1,0)
-
-
-%plotShape(dataShapes, dmeanShape, dummyReconstructionS, sortedEigVecS, sortedEigValS, 1, 1)
-
-
 
 generateShapes([1, 0.5, 0.1], [ 1,2,3;1,2,3;1,2,3;1,2,3;]);
 
@@ -118,79 +139,21 @@ function generatedShape = generateShapes(paraVec, eigenVects)
 end
 
 
-
-function data = projectOn2HauptVect (data, hauptVect1, hauptVect2)
+% projects Data to an hauptvector
+function data = projectOnHauptVect(data, hauptVect)
    for i = 1:length(data)
-   %data(:,i)
+   data(:,i) = sum(data(:,i).*hauptVect)*hauptVect;
+   end
+end
+
+
+function data = projectOnHauptVect3D(data, hauptVect1, hauptVect2)
+   for i = 1:length(data)
    item = data(:,i);
    data(:,i) = sum(item.*hauptVect1)*hauptVect1 + sum(item.*hauptVect2)*hauptVect2;
-   %data(:,i)
    end
-   return
 end
 
-
-% projects Data to an hauptvector
-function data = projectOnHauptVect (data, hauptVect)
-   for i = 1:length(data)
-   %data(:,i)
-   data(:,i) = sum(data(:,i).*hauptVect)*hauptVect;
-   %data(:,i)
-   end
-   return
-end
-
-%computes pca
-function [geordneteEigenVects, geordneteEigenVals] = pca(data)
-    %[v,d] = eig(data)
-    
-    data = data - mean(data,2);
-    %nexttile
-    %plot(data(1,:),data(2,:))
-    %[a,b] = eig(ourCov2(data))
-    [geordneteEigenVals,i] = sort(eig(ourCov2(data)),'descend');
-    [vect,val] = eig(ourCov2(data));
-    geordneteEigenVects = vect(:,i);
-    return
-end
-
-%computes covariance
-function covMatrix = ourCov2(dataMatrix)
-
-    [r,c] = size(dataMatrix);
-    covMatrix = ones(r);
-    
-    for ix = 1:r
-        for iy = 1:r
-            covMatrix(ix,iy) = covFunc(dataMatrix(ix,:),dataMatrix(iy,:));
-        end
-    end
-    return
-end
-
-
-% helperFunction
-function result = covFunc(column1, column2)
-    %data = load('/home/johannes/uni/21ss/MedInf/daten.mat');
-    %m = cov(data.data1(:,1),data.data1(:,2));
-    %disp(m);
-    
-    weight = 1/(length(column1) - 1 );
-    
-    mean1 = mean(column1);
-    mean2 = mean(column2);
-    
-    result = weight * (sum((column1 - mean1) .* (column2 - mean2)));
-    return
-end
-
-%{
-[eigenValues,i] = sort(eig(ourCov2(d)),'descend')
-[vect,val] = eig(ourCov2(d))
-geordneteEigenVects = vect(:,i)
-geordneteEigenVects(:,1)
-%}
-%hauptVect = geordneteEigenVects(:,1)
 
 %d(:,1)
 %{
@@ -210,27 +173,3 @@ end
 %sum([1 0 0] .* [1 0 0])
 
 
-%{
-fn = fieldnames(data2D)
-c = numel(fn)
-
-tiledlayout(c,1)
-
-for i = 1:c
-    d = data2D.(fn{i});
-    d = d - mean(d,2)
-
-    nexttile
-    plot(d(1,:), d(2,:),'x')
-    axis equal
-
-    title('data')
-    cov(d(1,:),d(2,:))
-    ourCov2(d)
-end
-%}
-
-%task 1a with own covFunction
-%ownMat2D = ourCov2(data2D.data1)
-%task 1a comparison with predefined cov
-%m2D = cov(data2D.data1(1,:),data2D.data1(2,:))
