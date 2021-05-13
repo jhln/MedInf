@@ -67,22 +67,22 @@ hauptVect = eigenVects(:,1);
 hauptVect = eigenVects(:,1);
 helperProjection = projectOnHauptVect(activeData, hauptVect);
 
-%andere art zu projezieren siehe Task 4, auch hier scheinen die daten
-%um die x-achse gespiegelt, vielleicht wegen dem transpose?
-projectedData = transpose(activeData) * eigenVects;
+%flip the eigenvector sign to get representative data 
+projectedData = transpose(activeData) * -eigenVects;
 projectedData(:,2) = zeros(1,length(projectedData(:,2)));
-reconstructedData = (hauptVect) * transpose(projectedData(:,1)) + mean(activeData,2);
-%additionally ploting the correct helperProjection (o) and the
-%reconstruction (+)
-plot2DPCA(transpose(activeData),mean(activeData,2),(projectedData),eigenVects,diag(eigenVals),1,1);
-plot(helperProjection(1,:),helperProjection(2,:),'o')
-plot(reconstructedData(1,:),reconstructedData(2,:),'+')
-title('Aufgabe3.1')
+reconstructedData = (-hauptVect) * transpose(projectedData(:,1)) + mean(activeData,2);
+%additionally ploting the correct helperProjection (o) and the reconstruction (+)
+%plot2DPCA(transpose(activeData),mean(activeData,2),(projectedData),eigenVects,diag(eigenVals),1,1);
+%plot(helperProjection(1,:),helperProjection(2,:),'o')
+%plot(reconstructedData(1,:),reconstructedData(2,:),'+')
+%title('Aufgabe3.1')
 
 nebenVect = eigenVects(:,2);
 projectedData2 = projectOnHauptVect(activeData, nebenVect);
 %plot2DPCA(transpose(activeData),mean(activeData,2),transpose(projectedData2),eigenVects,diag(eigenVals),1,1)
 %title('Aufgabe3.2')
+
+meanSquaredError = mean((activeData - reconstructedData).^2,'all');
 
 
 
@@ -99,17 +99,15 @@ plot3DPCA(transpose(activeData), transpose(mean(activeData,2)), eigenVects3D, di
 
 %projectedData3D = projectOnHauptVect3D(activeData, eigenVects3D(:,1), eigenVects3D(:,2));
 
-%andere art zu projezieren, nicht ganz sicher obs stimmt, z-komponente sollte
-%vernachlässigbar sein, daten wirken aber um x gespiegelt, aber die rekonstruktion scheint richtig.
-projectedData3D = transpose(activeData) * eigenVects3D;
+%flip eigenvector sign to get representative data 
+projectedData3D = transpose(activeData) * -eigenVects3D;
 projectedData3D(:,3) = zeros(1,length(projectedData3D(:,1)));
 plot3(projectedData3D(:,1),projectedData3D(:,2),projectedData3D(:,3),'o');
 
-reconstructedData3D = (eigenVects3D(:,1:2)) * transpose(projectedData3D(:,1:2)) + mean(activeData,2);
+reconstructedData3D = (-eigenVects3D(:,1:2)) * transpose(projectedData3D(:,1:2)) + mean(activeData,2);
 plot3(reconstructedData3D(1,:),reconstructedData3D(2,:),reconstructedData3D(3,:),'+');
 title('Aufgabe 4')
 
-return
 
 
 %
