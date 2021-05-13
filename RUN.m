@@ -94,19 +94,19 @@ activeData = data3D.data;
 activeData = activeData - mean(activeData,2);
 [eigenVects3D,eigenVals3D]= ourPca(activeData);
 
-plot3DPCA(transpose(activeData), transpose(mean(activeData,2)), eigenVects3D, diag(eigenVals3D), 1, 1)
+%plot3DPCA(transpose(activeData), transpose(mean(activeData,2)), eigenVects3D, diag(eigenVals3D), 1, 1)
 % error elipsoid fehlt noch
 
-%projectedData3D = projectOnHauptVect3D(activeData, eigenVects3D(:,1), eigenVects3D(:,2));
+%helperProjection = projectOnHauptVect3D(activeData, eigenVects3D(:,1), eigenVects3D(:,2));
 
 %flip eigenvector sign to get representative data 
 projectedData3D = transpose(activeData) * -eigenVects3D;
 projectedData3D(:,3) = zeros(1,length(projectedData3D(:,1)));
-plot3(projectedData3D(:,1),projectedData3D(:,2),projectedData3D(:,3),'o');
+%plot3(projectedData3D(:,1),projectedData3D(:,2),projectedData3D(:,3),'o');
 
 reconstructedData3D = (-eigenVects3D(:,1:2)) * transpose(projectedData3D(:,1:2)) + mean(activeData,2);
-plot3(reconstructedData3D(1,:),reconstructedData3D(2,:),reconstructedData3D(3,:),'+');
-title('Aufgabe 4')
+%plot3(reconstructedData3D(1,:),reconstructedData3D(2,:),reconstructedData3D(3,:),'+');
+%title('Aufgabe 4')
 
 
 
@@ -114,26 +114,44 @@ title('Aufgabe 4')
 %   Aufgabe 5
 %
 
+shapes = dataS.aligned;
+
+%draw all bones 
+%{
+plot(shapes(:,1,1),shapes(:,2,1));
+axis equal
+hold on
+for i = 2:13
+    plot(shapes(:,1,i),shapes(:,2,i));
+end
+hold off
+%}
+
+plotShape(shapes);
+return 
+
+
+
+return
+
 dataShapes = dataS.aligned;
-meanShape = mean(dataShapes,3);
+meanShape2 = mean(dataShapes,3);
 [sortedEigVecS, sortedEigValS] = ourPca(dataShapes);
 %sortedEigVecS(:,2)
 chosenEigenV = [sortedEigVecS(:,1), sortedEigVecS(:,2),sortedEigVecS(:,3) ];
-dummyReconstructionS = generateShapes([1,1,1], chosenEigenV )
+dummyReconstructionS = generateShapes2([1,1,1], chosenEigenV );
 
 % noch zu schreiben, plottet die reconstructed Shapes anhand der varianc
 % und abweichung 
-%%%%plotShape(dataShapes, dmeanShape, dummyReconstructionS, sortedEigVecS, sortedEigValS, 1, 1)
-
-
+plotShape(dataShapes, dmeanShape, dummyReconstructionS, sortedEigVecS, sortedEigValS, 1, 1)
 
 %
 %   Util
 %
 
-generateShapes([1, 0.5, 0.1], [ 1,2,3;1,2,3;1,2,3;1,2,3;]);
+generateShapes2([1, 0.5, 0.1], [ 1,2,3;1,2,3;1,2,3;1,2,3;]);
 
-function generatedShape = generateShapes(paraVec, eigenVects)
+function generatedShape = generateShapes2(paraVec, eigenVects)
     l = length(eigenVects);
     generatedShape = transpose([zeros(1,l)]);
     for i = 1:length(paraVec)
@@ -161,23 +179,4 @@ function data = projectOnHauptVect3D(data, hauptVect1, hauptVect2)
    data(:,i) = sum(item.*hauptVect1)*hauptVect1 + sum(item.*hauptVect2)*hauptVect2;
    end
 end
-
-
-%d(:,1)
-%{
-for i = 1:length(d)
-   d(:,i)
-   d(:,i) = sum(d(:,i).*hauptVect)*hauptVect;
-   d(:,i)
-end
-%}
-
-%hauptVect
-%sum(d(:,1).*hauptVect).*hauptVect
-
-
-%@(x) sum(d(:,x).*hauptVect)*hauptVect
-%C=(sum(A.*B)/(norm(B)^2))*B;
-%sum([1 0 0] .* [1 0 0])
-
 
