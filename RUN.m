@@ -13,7 +13,7 @@ activeData = data2D.data3;
 %
 %   Aufgabe 1
 %
-activeData = activeData - mean(activeData,2);
+%activeData = activeData - mean(activeData,2);
 covarianzMatrix = ourCov(activeData);
 
 %iterate over all data matrices in e.g. data2D
@@ -95,7 +95,7 @@ meanSquaredError = mean((activeData - reconstructedData2).^2,'all');
 activeData = data3D.data;
 %activeData = activeData - mean(activeData,2);
 [eigenVects3D,eigenVals3D]= ourPca(activeData);
-ourcov = ourCov(activeData);
+%ourcov = ourCov(activeData);
 
 plot3DPCA(transpose(activeData), transpose(mean(activeData,2)), eigenVects3D, diag(eigenVals3D), 1, 1)
 
@@ -133,15 +133,17 @@ meanShape = mean(formattedData,1);
 formattedData = formattedData - meanShape;
 [sortedEigVectsShapes, sortedEigValsShapes] = ourPca(transpose(formattedData));
 
-%use all eigenvectors
-nEigenvectors = 256;
+%use only some eigenvectors
+nEigenvectors = 13;
 
+%{
 %set b to sqrt(nEigenvalues)
 figure
 b = 3 * sqrt(sortedEigValsShapes(1:nEigenvectors,1));
 temp = b(1,1);
 b(:,1) = 0;
 b(1,1) = temp;
+
 plotShape(meanShape,sortedEigVectsShapes,b,'b');
 axis equal
 hold on
@@ -151,6 +153,7 @@ b = -b;
 plotShape(meanShape,sortedEigVectsShapes,b,'b');
 hold off
 title('Task 5b')
+%}
 
 %100 % of the total variance
 temp = sqrt(sortedEigValsShapes(1:nEigenvectors,1));
@@ -159,17 +162,23 @@ figure
 axis equal
 hold on
 %plot 5 random example shapes
+scale = [0.2, 0.5, 1.0, 2.0, 4.0];
+%scale = ones(1,5) * 0.3;
+rotation = [30, 60, 90, 120, 0];
+%rotation = zeros(1,5);
+x_translation = [0, 20, 40, 80, 160];
+y_translation = [0,10,20,30,40];
 for i = 1:5
-b = (rand(nEigenvectors,1)) .* (temp);
-plotShape(meanShape,sortedEigVectsShapes,b,'b');
+    b = (rand(nEigenvectors,1)) .* (temp);
+    plotShape(meanShape,sortedEigVectsShapes,b,scale(i),rotation(i),x_translation(i),y_translation(i),'b');
 end
 
 hold off
 title('Task 5c')
-figure
-axis equal
-hold on
 
+
+
+%{
 %restrict to 95% of the total variance
 sumEigenValues = sum(sortedEigValsShapes);
 threshold = 0.95 * sumEigenValues;
@@ -189,43 +198,7 @@ title('Task 5c')
 figure
 axis equal
 hold on
-
-%restrict to 90% of the total variance
-sumEigenValues = sum(sortedEigValsShapes);
-threshold = 0.9 * sumEigenValues;
-A = ones(length(sortedEigValsShapes(:,1)),1) * threshold;
-[minValue,closestIndex] = min(abs(cumsum(sortedEigValsShapes)-A));
-nEigenvectors = closestIndex;
-temp = sqrt(sortedEigValsShapes(1:nEigenvectors,1));
-
-%plot 5 random example shapes
-for i = 1:5
-b = (rand(nEigenvectors,1)) .* (temp);
-plotShape(meanShape,sortedEigVectsShapes,b,'b');
-end
-
-hold off
-title('Task 5c')
-figure
-axis equal
-hold on
-
-%restrict to 80% of the total variance
-sumEigenValues = sum(sortedEigValsShapes);
-threshold = 0.8 * sumEigenValues;
-A = ones(length(sortedEigValsShapes(:,1)),1) * threshold;
-[minValue,closestIndex] = min(abs(cumsum(sortedEigValsShapes)-A));
-nEigenvectors = closestIndex;
-temp = sqrt(sortedEigValsShapes(1:nEigenvectors,1));
-
-%plot 5 random example shapes
-for i = 1:5
-b = (rand(nEigenvectors,1)) .* (temp);
-plotShape(meanShape,sortedEigVectsShapes,b,'b');
-end
-
-hold off
-title('Task 5c')
+%}
 
 %
 %   Util
