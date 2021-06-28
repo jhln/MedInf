@@ -206,18 +206,18 @@ hold on
 
 %formate bone shapes into 14x256 matrix (one row = x1 y1 x2 y2 ....)
 function formattedShapes = format(data)
-formattedShapes = zeros(14,256);
-for j = 1:14
-temp = zeros(1,256);
-index = 1;
-for i = 1:128
-    temp(1,index) = data(i,1,j);
-    index = index + 1;
-    temp(1,index) = data(i,2,j);
-    index = index + 1;
-end
-formattedShapes(j,:) = temp;
-end
+    formattedShapes = zeros(14,256);
+    for j = 1:14
+        temp = zeros(1,256);
+        index = 1;
+        for i = 1:128
+            temp(1,index) = data(i,1,j);
+            index = index + 1;
+            temp(1,index) = data(i,2,j);
+            index = index + 1;
+        end
+        formattedShapes(j,:) = temp;
+    end
 end
 
 % projects Data to an hauptvector
